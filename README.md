@@ -65,9 +65,17 @@ magpie plugin options memorix '{"endpoint":"http://127.0.0.1:3211"}'
 
 ## 诊断
 
+**“感觉插件没生效”的三个已知原因，按出现概率排查：**
+
+1. **改过插件源码/选项后没重启 magpie 应用**。`magpie plugin off/on` 不总是让网关重新读 hook 清单；旧版本 app 启动时就把清单固定了。重启 magpie 应用即可。
+2. **对话历史里引用过 `<memorix-context>` 块**（早期版本的 bug，v0.1.0 已修）：只要某条历史回复里引用/复述过这个块，那之后整个会话都会被误判“已注入”而跳过。已改为只检查本轮用户消息本身。
+3. **agent 没在正文里声明工作目录且 cwd 为空** → `unbound`。插件会从请求正文里找 `CWD:` / `working directory:` / `<environment_context>`；都没有时用 `projectRoot` 配置显式指定。
+
+进一步定位：
+
 - 设 `MAGPIE_MEMORIX_DEBUG=1` 后重启 magpie，插件会把每次决策写到 stderr（注入字节数、回放、跳过原因、写回类型）。
-- magpie 的插件页会显示 hook 每次的 `report` 码：`ready` / `empty` / `unbound` / `unavailable` / `invalid` / `skipped`。
-- **装完/改完必须让 magpie 重新加载插件**：`magpie plugin off <name>` 再 `magpie plugin on <name>` 通常会重启插件宿主；如果 hook 仍不触发（`magpie plugin` 里能看到它、但请求里没有注入），**重启 magpie 应用**即可——旧版本应用在启动时就把 hook 清单固定下来，事后添加或修改的 hook 要应用重启才会进入网关的请求链（本机实测 0.1.3846 如此）。
+- magpie 插件页会显示 hook 每次的 `report` 码：`ready`（注入成功）/ `empty` / `unbound` / `unavailable`（memorix 没起或超时）/ `invalid` / `skipped`。
+- 快速自检：`node bin/selftest.mjs`（memorix 侧）+ 一条带 `Current working directory: <repo>` 的最小请求问“项目版本号是什么”。
 
 ## 已知边界
 
