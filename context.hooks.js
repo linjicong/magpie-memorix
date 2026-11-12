@@ -31,7 +31,7 @@ import {
   extractRequestFilePaths,
   collectRequestText,
 } from './src/text.js';
-import { turnsOf, targetTurn, turnKey, hasMarker, hasBlock } from './src/turns.js';
+import { turnsOf, targetTurn, turnKey, hasBlock } from './src/turns.js';
 import { renderContextBlock, trimToBudget, appendToTurn, injectSystemContext } from './src/inject.js';
 import { recallFor, resetRecallCache } from './src/recall.js';
 import { fetchMemoryDetails } from './src/details.js';
@@ -135,8 +135,6 @@ export async function onRequest(body, ctx) {
     const protocol = protocolOf(ctx);
     const turns = turnsOf(body, protocol);
     if (!turns.length) return report(ctx, 'skipped');
-    // The client (or another memory agent) already supplied context: leave it.
-    if (hasMarker(turns)) return report(ctx, 'skipped');
 
     const projectRoot = resolveProjectRoot(
       cfg,
@@ -154,6 +152,9 @@ export async function onRequest(body, ctx) {
 
     const target = targetTurn(turns, query);
     if (!target) return report(ctx, 'skipped');
+    // Only the turn we would write into matters: an earlier reply may quote a
+    // block (a log, a summary) without this turn already having one.
+    if (hasBlock(target.text)) return report(ctx, 'skipped');
 
     if (cfg.position === 'system') {
       const recalled = await recallFor({ projectRoot, query, cfg, signal: ctx?.signal, agentId: ctx?.agent });

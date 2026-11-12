@@ -116,6 +116,21 @@ test('a repeated turn (tool loop) is replayed without asking memorix again', asy
   assert.equal(fake.requests.length, 1);
 });
 
+test('a quoted block in history does not disable the current turn', async () => {
+  await memorix();
+  const body = {
+    messages: [
+      userTurn('早前的请求'),
+      assistantTurn('这是当时注入的块：\n<memorix-context project="p">\nbody\n</memorix-context>'),
+      userTurn('现在的新问题'),
+    ],
+  };
+  const { ctx, last } = makeContext(fake.endpoint, { query: '现在的新问题' });
+  await onRequest(body, ctx);
+  assert.equal(last(), 'ready');
+  assert.match(body.messages[2].content, /<memorix-context/);
+});
+
 test('an already annotated turn is left alone', async () => {
   await memorix();
   const body = { messages: [userTurn('问题\n\n<memorix-context>\nold\n</memorix-context>')] };

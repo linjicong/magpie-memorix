@@ -118,8 +118,3 @@ export function targetTurn(turns, query = '') {
   }
   return users.at(-1) ?? null;
 }
-
-/** True when a turn already carries memorix context (ours or another agent's). */
-export function hasMarker(turns) {
-  return turns.some((turn) => hasBlock(turn.text));
-}

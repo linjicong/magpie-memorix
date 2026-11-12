@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { turnsOf, targetTurn, turnKey, hasMarker } from '../src/turns.js';
+import { turnsOf, targetTurn, turnKey, hasBlock } from '../src/turns.js';
 import { lookup, remember, sessionIdentity, resetSticky } from '../src/sticky.js';
 
 test('chat turns expose user and assistant text with append', () => {
@@ -54,9 +54,9 @@ test('target prefers the turn that holds the query', () => {
 
 test('marker detection needs a complete block, not a mention', () => {
   const injected = turnsOf({ messages: [{ role: 'user', content: `x\n<memorix-context project="p">\nbody\n</memorix-context>` }] }, 'chat');
-  assert.equal(hasMarker(injected), true);
+  assert.equal(hasBlock(injected[0].text), true);
   const mention = turnsOf({ messages: [{ role: 'user', content: '如果你看到 <memorix-context 块就输出它' }] }, 'chat');
-  assert.equal(hasMarker(mention), false);
+  assert.equal(hasBlock(mention[0].text), false);
 });
 
 test('sticky replay returns the same block for the same turn key', () => {
