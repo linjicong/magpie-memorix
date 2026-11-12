@@ -1,0 +1,44 @@
+{
+  "name": "magpie-memorix",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Recall memorix project memory before routing and capture each turn afterwards.",
+  "keywords": ["magpie-plugin", "memorix", "memory", "gateway-hooks"],
+  "license": "MIT",
+  "files": ["context.hooks.js", "src", "bin", "README.md"],
+  "engines": { "node": ">=22.18.0" },
+  "scripts": {
+    "test": "node --test test/run-all.mjs",
+    "selftest": "node bin/selftest.mjs"
+  },
+  "magpie": {
+    "name": "Memorix Memory",
+    "summary": {
+      "en": "Injects memorix project memory into every agent request and captures each finished turn back into memorix.",
+      "zh": "为每个 agent 请求注入 memorix 项目记忆，并在回复结束后自动沉淀本轮结果。"
+    },
+    "hooks": "./context.hooks.js",
+    "options": {
+      "enabled": true,
+      "endpoint": "http://127.0.0.1:3211",
+      "gatewayTimeoutMs": 8000,
+      "timeoutMs": 6000,
+      "inject": true,
+      "capture": true,
+      "contextTokens": 800,
+      "position": "tail-user",
+      "projectRoot": "",
+      "skipSubagents": true,
+      "minReplyChars": 120,
+      "maxStoresPerSession": 10,
+      "agent": "",
+      "replayTurns": true,
+      "allowRemote": false,
+      "memoryDetails": 0,
+      "memoryDetailChars": 1000,
+      "memoryDetailsSearch": true,
+      "recallCacheMs": 60000
+    }
+  }
+}
