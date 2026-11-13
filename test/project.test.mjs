@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { findProjectRoot, projectRootFromText, resolveProjectRoot } from '../src/project.js';
+import { findProjectRoot, projectRootFromText, resolveProjectRoot, cleanCwd } from '../src/project.js';
 
 function repo(name = 'repo') {
   const dir = mkdtempSync(join(tmpdir(), `memorix-${name}-`));
@@ -42,6 +42,21 @@ test('an injected memorix block never decides the project', () => {
   const root = repo();
   const text = `<memorix-context project="x">\n[文件] ${root}/src/app.ts\n</memorix-context>\nfiller`;
   assert.equal(projectRootFromText(text), null);
+});
+
+test('a cwd that arrives with quotes and a period still resolves', () => {
+  const root = repo('quoted');
+  // magpie 0.1.4026 parses `Current working directory: "D:\repo".` verbatim.
+  assert.equal(cleanCwd(`"${root}".`), root);
+  assert.equal(cleanCwd(`“${root}”，`), root);
+  assert.equal(findProjectRoot(`"${root}".`), root);
+  assert.equal(resolveProjectRoot({ projectRoot: '' }, `"${root}".`, ''), root);
+});
+
+test('a non-git cwd falls through to the request text', () => {
+  const root = repo('textwin');
+  const plain = mkdtempSync(join(tmpdir(), 'memorix-plain-'));
+  assert.equal(resolveProjectRoot({ projectRoot: '' }, plain, `cwd: ${root}`), root);
 });
 
 test('resolveProjectRoot prefers config, then cwd, then text', () => {

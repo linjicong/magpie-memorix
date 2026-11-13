@@ -30,11 +30,34 @@ export function isDirectory(path) {
   }
 }
 
+/**
+ * A cwd as magpie parsed it may carry its own punctuation: the quoted form
+ * `Current working directory: "D:\repo".` arrives with the quotes and the
+ * trailing period (seen on magpie 0.1.4026; 0.1.3846 parsed nothing at all).
+ * Strip quote runs and trailing punctuation before the path is used.
+ */
+export function cleanCwd(raw) {
+  let value = String(raw ?? '').trim();
+  // Peel punctuation and quotes from the ends in any order: `"D:\repo".`
+  // has the period outside the quotes, `D:\repo",` the other way round.
+  for (;;) {
+    const next = value
+      .replace(/^[.,;:!¿?¡，。；：、（(]+/, '')
+      .replace(/[.,;:!？?¡，。；：、）)]+$/, '')
+      .replace(/^["'“”‘’`]+/, '')
+      .replace(/["'“”‘’`]+$/, '')
+      .trim();
+    if (next === value) return next;
+    value = next;
+  }
+}
+
 export function findProjectRoot(cwd) {
-  if (typeof cwd !== 'string' || !cwd.trim()) return null;
+  const cleaned = cleanCwd(cwd);
+  if (!cleaned) return null;
   let dir;
   try {
-    dir = resolve(cwd.trim());
+    dir = resolve(cleaned);
   } catch {
     return null;
   }
@@ -120,6 +143,9 @@ export function resolveProjectRoot(cfg, cwd, text = '') {
       /* fall through */
     }
   }
+  // A cwd that magpie parsed with junk in it, or pointing at a folder that is
+  // not a git project, must not block the request's own text: agents name
+  // their directory in instructions too, and that is the same information.
   const fromCwd = findProjectRoot(cwd);
   if (fromCwd) return fromCwd;
   return projectRootFromText(text);

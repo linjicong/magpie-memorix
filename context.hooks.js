@@ -136,11 +136,7 @@ export async function onRequest(body, ctx) {
     const turns = turnsOf(body, protocol);
     if (!turns.length) return report(ctx, 'skipped');
 
-    const projectRoot = resolveProjectRoot(
-      cfg,
-      ctx?.cwd,
-      ctx?.cwd ? '' : collectRequestText(body, protocol),
-    );
+    const projectRoot = resolveProjectRoot(cfg, ctx?.cwd, collectRequestText(body, protocol));
     if (!projectRoot) {
       debug('unbound', { cwd: ctx?.cwd });
       return report(ctx, 'unbound');
@@ -250,11 +246,7 @@ export async function onResponse(reply, ctx) {
 
     const protocol = protocolOf(ctx);
     const request = ctx?.request;
-    const projectRoot = resolveProjectRoot(
-      cfg,
-      ctx?.cwd,
-      ctx?.cwd ? '' : collectRequestText(request, protocol),
-    );
+    const projectRoot = resolveProjectRoot(cfg, ctx?.cwd, collectRequestText(request, protocol));
     if (!projectRoot) return report(ctx, 'unbound'), null;
 
 
