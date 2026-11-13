@@ -1,11 +1,16 @@
 {
   "name": "magpie-memorix",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
-  "description": "Recall memorix project memory before routing and capture each turn afterwards.",
-  "keywords": ["magpie-plugin", "memorix", "memory", "gateway-hooks"],
+  "description": "Magpie gateway hook: recall memorix project memory before routing and capture each finished turn back into memorix.",
+  "keywords": ["magpie-plugin", "magpie", "memorix", "memory", "mcp", "gateway"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/linjicong/magpie-memorix.git"
+  },
+  "bugs": "https://github.com/linjicong/magpie-memorix/issues",
+  "homepage": "https://github.com/linjicong/magpie-memorix#readme",
   "files": ["context.hooks.js", "src", "bin", "README.md"],
   "engines": { "node": ">=22.18.0" },
   "scripts": {

@@ -19,7 +19,7 @@ IDE / Agent ──▶ magpie gateway ──▶ 上游模型
 
 ```bash
 node bin/selftest.mjs              # 体检：可达性 / 工具 / 读 / --store 写
-magpie plugin add ./magpie-memorix # 安装（本地文件夹即可）
+magpie plugin add magpie-memorix   # 从 npm 安装（或 github:linjicong/magpie-memorix）
 magpie plugin options memorix '{"endpoint":"http://127.0.0.1:3211"}'
 ```
 
